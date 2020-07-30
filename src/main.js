@@ -357,8 +357,6 @@ const createloadButtonTemplate = () => {
   return (`<button class="load-more" type="button">load more</button>`);
 };
 
-
-
 const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
@@ -381,4 +379,3 @@ for (let i = 0; i < CARDS_COUNT; i++) {
   render(cardsContainer, createCardTemplate(), 'beforeend');
 };
 render(boardElement, createloadButtonTemplate(), 'beforeend');
-
