@@ -109,7 +109,7 @@ const createBoardFiltersTemplate = () => {
 };
 
 const editCardTemplate = () => {
-  return(`<article class="card card--edit card--black">
+  return (`<article class="card card--edit card--black">
   <form class="card__form" method="get">
     <div class="card__inner">
       <div class="card__color-bar">
@@ -361,21 +361,22 @@ const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
 
-const mainElement = document.querySelector('.main');
-const siteHeader = mainElement.querySelector('.main__control');
+const mainElement = document.querySelector(`.main`);
+const siteHeader = mainElement.querySelector(`.main__control`);
 
-render(siteHeader, createSiteMenuTemplate(), 'beforeend');
+render(siteHeader, createSiteMenuTemplate(), `beforeend`);
 
-render(mainElement, createSiteFilterTemplate(), 'beforeend');
-render(mainElement, createBoardElement(), 'beforeend');
+render(mainElement, createSiteFilterTemplate(), `beforeend`);
+render(mainElement, createBoardElement(), `beforeend`);
 
-const boardElement = mainElement.querySelector('.board');
-const filtersContainer = boardElement.querySelector('.board__filter-list');
-const cardsContainer = boardElement.querySelector('.board__tasks');
+const boardElement = mainElement.querySelector(`.board`);
+const filtersContainer = boardElement.querySelector(`.board__filter-list`);
+const cardsContainer = boardElement.querySelector(`.board__tasks`);
 
-render(filtersContainer, createBoardFiltersTemplate(), 'beforeend');
-render(cardsContainer, editCardTemplate(), 'beforeend');
+render(filtersContainer, createBoardFiltersTemplate(), `beforeend`);
+render(cardsContainer, editCardTemplate(), `beforeend`);
 for (let i = 0; i < CARDS_COUNT; i++) {
-  render(cardsContainer, createCardTemplate(), 'beforeend');
-};
-render(boardElement, createloadButtonTemplate(), 'beforeend');
+  render(cardsContainer, createCardTemplate(), `beforeend`);
+}
+
+render(boardElement, createloadButtonTemplate(), `beforeend`);
