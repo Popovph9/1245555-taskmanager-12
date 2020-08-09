@@ -5,7 +5,7 @@ export const getRandomInteger = (a = 0, b = 1) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-const getCurrentday = () => {
+const getCurrentDay = () => {
   const currentDate = new Date();
 
   currentDate.setHours(23, 59, 59, 999);
@@ -18,7 +18,7 @@ export const isExpired = (dueDate) => {
     return false;
   }
 
-  const currentDate = getCurrentday();
+  const currentDate = getCurrentDay();
 
   return currentDate.getTime() > dueDate.getTime();
 };
@@ -29,7 +29,7 @@ export const isTaskExpireToday = (dueDate) => {
     return false;
   }
 
-  const currentDate = getCurrentday();
+  const currentDate = getCurrentDay();
 
   return currentDate.getTime() === dueDate.getTime();
 };

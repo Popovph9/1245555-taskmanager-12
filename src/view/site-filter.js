@@ -15,7 +15,7 @@ const createFilterItemTemplate = (filter, isChecked) => {
   );
 };
 
-export const createSiteFilterTemplate = (filterItems) => {
+export const getCreateSiteFilterTemplate = (filterItems) => {
   const filterItemTemplate = filterItems.map((filter, index) => createFilterItemTemplate(filter, index)).join(``);
 
   return (`<section class="main__filter filter container">

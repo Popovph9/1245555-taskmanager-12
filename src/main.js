@@ -1,10 +1,10 @@
-import {createSiteMenuTemplate} from "./view/site-menu.js";
-import {createSiteFilterTemplate} from "./view/site-filter.js";
-import {createBoardElement} from "./view/board-element.js";
-import {createBoardFiltersTemplate} from "./view/board-filters.js";
-import {editCardTemplate} from "./view/edit-card.js";
-import {createCardTemplate} from "./view/create-card.js";
-import {createloadButtonTemplate} from "./view/load-button.js";
+import {getCreateSiteMenuTemplate} from "./view/site-menu.js";
+import {getCreateSiteFilterTemplate} from "./view/site-filter.js";
+import {getCreateBoardElement} from "./view/board-element.js";
+import {getCreateBoardFiltersTemplate} from "./view/board-filters.js";
+import {getEditCardTemplate} from "./view/edit-card.js";
+import {getCreateCardTemplate} from "./view/create-card.js";
+import {getLoadButtonTemplate} from "./view/load-button.js";
 import {generateTask} from "./view/task.js";
 import {generateFilter} from "./view/filters.js";
 
@@ -21,26 +21,26 @@ const render = (container, template, place) => {
 const mainElement = document.querySelector(`.main`);
 const siteHeader = mainElement.querySelector(`.main__control`);
 
-render(siteHeader, createSiteMenuTemplate(), `beforeend`);
+render(siteHeader, getCreateSiteMenuTemplate(), `beforeend`);
 
-render(mainElement, createSiteFilterTemplate(filters), `beforeend`);
-render(mainElement, createBoardElement(), `beforeend`);
+render(mainElement, getCreateSiteFilterTemplate(filters), `beforeend`);
+render(mainElement, getCreateBoardElement(), `beforeend`);
 
 const boardElement = mainElement.querySelector(`.board`);
 const filtersContainer = boardElement.querySelector(`.board__filter-list`);
 const cardsContainer = boardElement.querySelector(`.board__tasks`);
 
-render(filtersContainer, createBoardFiltersTemplate(), `beforeend`);
-render(cardsContainer, editCardTemplate(tasks[0]), `beforeend`);
+render(filtersContainer, getCreateBoardFiltersTemplate(), `beforeend`);
+render(cardsContainer, getEditCardTemplate(tasks[0]), `beforeend`);
 
 for (let i = 1; i < Math.min(tasks.length, CARDS_COUNT_PER_STEP); i++) {
-  render(cardsContainer, createCardTemplate(tasks[i]), `beforeend`);
+  render(cardsContainer, getCreateCardTemplate(tasks[i]), `beforeend`);
 }
 
-if (tasks.length >= CARDS_COUNT_PER_STEP) {
+if (tasks.length > CARDS_COUNT_PER_STEP) {
   let renderedCardsCount = CARDS_COUNT_PER_STEP;
 
-  render(boardElement, createloadButtonTemplate(), `beforeend`);
+  render(boardElement, getLoadButtonTemplate(), `beforeend`);
 
   const loadMoreButton = boardElement.querySelector(`.load-more`);
 
@@ -49,7 +49,7 @@ if (tasks.length >= CARDS_COUNT_PER_STEP) {
 
     tasks.
       slice(renderedCardsCount, renderedCardsCount + CARDS_COUNT_PER_STEP).
-      forEach((task) => render(cardsContainer, createCardTemplate(task), `beforeend`));
+      forEach((task) => render(cardsContainer, getCreateCardTemplate(task), `beforeend`));
   });
 
   renderedCardsCount += CARDS_COUNT_PER_STEP;

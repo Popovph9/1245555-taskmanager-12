@@ -61,7 +61,7 @@ const createCardEditColorTeamplate = (currentColor) => {
   >`).join(``);
 };
 
-export const editCardTemplate = (tasks = {}) => {
+export const getEditCardTemplate = (tasks = {}) => {
   const {
     color = `black`,
     description = ``,

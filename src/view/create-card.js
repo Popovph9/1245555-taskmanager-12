@@ -1,6 +1,6 @@
 import {isExpired, isRepeating, humanizeTaskDueDate} from "../util.js";
 
-export const createCardTemplate = (tasks) => {
+export const getCreateCardTemplate = (tasks) => {
   const {color, description, dueDate, repeating, isArchive, isFavorite} = tasks;
 
   const date = dueDate !== null ? humanizeTaskDueDate(dueDate) : ``;
