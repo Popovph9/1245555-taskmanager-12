@@ -1,4 +1,4 @@
-export const createBoardElement = () => {
+export const getCreateBoardElement = () => {
   return (`<section class="board container">
   <div class="board__filter-list"></div>
 
