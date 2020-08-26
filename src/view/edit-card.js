@@ -1,5 +1,22 @@
 import {COLORS} from "../const.js";
-import {isExpired, humanizeTaskDueDate} from "../util.js";
+import {isExpired, humanizeTaskDueDate, createElement} from "../util.js";
+
+const BLANK_TASK = {
+  color: COLORS[0],
+  description: ``,
+  dueDate: null,
+  repeating: {
+    mo: false,
+    tu: false,
+    we: false,
+    th: false,
+    fr: false,
+    sa: false,
+    su: false
+  },
+  isArchive: false,
+  isFavorite: false
+};
 
 const createTaskEditDateTemplate = (dueDate) => {
   return `<button class="card__date-deadline-toggle" type="button">
@@ -61,21 +78,9 @@ const createCardEditColorTeamplate = (currentColor) => {
   >`).join(``);
 };
 
-export const getEditCardTemplate = (tasks = {}) => {
-  const {
-    color = `black`,
-    description = ``,
-    dueDate = null,
-    repeating = {
-      mo: false,
-      tu: false,
-      we: false,
-      th: false,
-      fr: false,
-      sa: false,
-      su: false
-    }
-  } = tasks;
+const getEditCardTemplate = (tasks) => {
+
+  const {color, description, dueDate, repeating} = tasks;
 
   const isExpiredClassName = isExpired(dueDate) ? `card--deadline` : ``;
 
@@ -87,47 +92,73 @@ export const getEditCardTemplate = (tasks = {}) => {
 
   const repeatingClassName = isRepeatig(repeating) ? `card--repeat` : ``;
 
-  return (`<article class="card card--edit ${color} ${isExpiredClassName} ${repeatingClassName}">
-  <form class="card__form" method="get">
-    <div class="card__inner">
-      <div class="card__color-bar">
-        <svg width="100%" height="10">
-          <use xlink:href="#wave"></use>
-        </svg>
-      </div>
+  return (
+    `<article class="card card--edit ${color} ${isExpiredClassName} ${repeatingClassName}">
 
-      <div class="card__textarea-wrap">
-        <label>
-          <textarea
-            class="card__text"
-            placeholder="Start typing your text here..."
-            name="text"
-          >${description}</textarea>
-        </label>
-      </div>
+      <form class="card__form" method="get">
+        <div class="card__inner">
+          <div class="card__color-bar">
+            <svg width="100%" height="10">
+              <use xlink:href="#wave"></use>
+            </svg>
+          </div>
 
-      <div class="card__settings">
-        <div class="card__details">
-          <div class="card__dates">
-            ${dateTemplate}
+          <div class="card__textarea-wrap">
+            <label>
+              <textarea
+                class="card__text"
+                placeholder="Start typing your text here..."
+                name="text"
+              >${description}</textarea>
+            </label>
+          </div>
 
-            ${repeatingTemplate}
+          <div class="card__settings">
+            <div class="card__details">
+              <div class="card__dates">
+                ${dateTemplate}
+
+                ${repeatingTemplate}
+              </div>
+            </div>
+
+            <div class="card__colors-inner">
+              <h3 class="card__colors-title">Color</h3>
+              <div class="card__colors-wrap">
+                ${CardEditColorTeamplate}
+              </div>
+            </div>
+          </div>
+
+          <div class="card__status-btns">
+            <button class="card__save" type="submit">save</button>
+            <button class="card__delete" type="button">delete</button>
           </div>
         </div>
-
-        <div class="card__colors-inner">
-          <h3 class="card__colors-title">Color</h3>
-          <div class="card__colors-wrap">
-            ${CardEditColorTeamplate}
-          </div>
-        </div>
-      </div>
-
-      <div class="card__status-btns">
-        <button class="card__save" type="submit">save</button>
-        <button class="card__delete" type="button">delete</button>
-      </div>
-    </div>
-  </form>
-</article>`);
+      </form>
+    </article>`
+  );
 };
+
+export default class CardEdit {
+  constructor(task) {
+    this._task = task || BLANK_TASK;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return getEditCardTemplate(this._task);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

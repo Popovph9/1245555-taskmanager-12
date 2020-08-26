@@ -1,10 +1,12 @@
-import {getCreateSiteMenuTemplate} from "./view/site-menu.js";
-import {getCreateSiteFilterTemplate} from "./view/site-filter.js";
-import {getCreateBoardElement} from "./view/board-element.js";
-import {getCreateBoardFiltersTemplate} from "./view/board-filters.js";
-import {getEditCardTemplate} from "./view/edit-card.js";
-import {getCreateCardTemplate} from "./view/create-card.js";
-import {getLoadButtonTemplate} from "./view/load-button.js";
+import {render, renderPosition} from "./util.js";
+import SiteMenu from "./view/site-menu.js";
+import SiteFilters from "./view/site-filter.js";
+import Board from "./view/board-element.js";
+import BoardFilters from "./view/board-filters.js";
+import TaskList from "./view/task-list.js";
+import CardEdit from "./view/edit-card.js";
+import CardCreate from "./view/create-card.js";
+import LoadButton from "./view/load-button.js";
 import {generateTask} from "./view/task.js";
 import {generateFilter} from "./view/filters.js";
 
@@ -14,47 +16,68 @@ const CARDS_COUNT_PER_STEP = 8;
 const tasks = new Array(CARDS_COUNT).fill().map(generateTask);
 const filters = generateFilter(tasks);
 
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
-
 const mainElement = document.querySelector(`.main`);
 const siteHeader = mainElement.querySelector(`.main__control`);
 
-render(siteHeader, getCreateSiteMenuTemplate(), `beforeend`);
+render(siteHeader, new SiteMenu().getElement(), renderPosition.BEFOREEND);
+render(mainElement, new SiteFilters(filters).getElement(), renderPosition.BEFOREEND);
 
-render(mainElement, getCreateSiteFilterTemplate(filters), `beforeend`);
-render(mainElement, getCreateBoardElement(), `beforeend`);
+const boardElement = new Board();
 
-const boardElement = mainElement.querySelector(`.board`);
-const filtersContainer = boardElement.querySelector(`.board__filter-list`);
-const cardsContainer = boardElement.querySelector(`.board__tasks`);
+render(mainElement, boardElement.getElement(), renderPosition.BEFOREEND);
+render(boardElement.getElement(), new BoardFilters().getElement(), renderPosition.AFTERBEGIN);
 
-render(filtersContainer, getCreateBoardFiltersTemplate(), `beforeend`);
-render(cardsContainer, getEditCardTemplate(tasks[0]), `beforeend`);
+const cardsContainer = new TaskList();
 
-for (let i = 1; i < Math.min(tasks.length, CARDS_COUNT_PER_STEP); i++) {
-  render(cardsContainer, getCreateCardTemplate(tasks[i]), `beforeend`);
+render(boardElement.getElement(), cardsContainer.getElement(), renderPosition.BEFOREEND);
+
+const renderCard = (taskListElement, task) => {
+  const cardComponent = new CardCreate(task);
+  const cardEditComponent = new CardEdit(task);
+
+  const replaceCardToForm = () => {
+    taskListElement.replaceChild(cardEditComponent.getElement(), cardComponent.getElement());
+  };
+
+  const replaceFormToCard = () => {
+    taskListElement.replaceChild(cardComponent.getElement(), cardEditComponent.getElement());
+  };
+
+  cardComponent.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
+    replaceCardToForm();
+  });
+
+  cardEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceFormToCard();
+  });
+
+  render(taskListElement, cardComponent.getElement(), renderPosition.BEFOREEND);
+};
+
+for (let i = 0; i < Math.min(tasks.length, CARDS_COUNT_PER_STEP); i++) {
+  renderCard(cardsContainer.getElement(), tasks[i]);
 }
 
 if (tasks.length > CARDS_COUNT_PER_STEP) {
   let renderedCardsCount = CARDS_COUNT_PER_STEP;
 
-  render(boardElement, getLoadButtonTemplate(), `beforeend`);
+  const loadButtonComponent = new LoadButton();
 
-  const loadMoreButton = boardElement.querySelector(`.load-more`);
+  render(boardElement.getElement(), loadButtonComponent.getElement(), renderPosition.BEFOREEND);
 
-  loadMoreButton.addEventListener(`click`, (evt) => {
+  loadButtonComponent.getElement().addEventListener(`click`, (evt) => {
     evt.preventDefault();
 
     tasks.
       slice(renderedCardsCount, renderedCardsCount + CARDS_COUNT_PER_STEP).
-      forEach((task) => render(cardsContainer, getCreateCardTemplate(task), `beforeend`));
+      forEach((task) => renderCard(cardsContainer.getElement(), task));
   });
 
   renderedCardsCount += CARDS_COUNT_PER_STEP;
 
   if (renderedCardsCount >= tasks.length) {
-    loadMoreButton.remove();
+    loadButtonComponent.getElement().remove();
+    loadButtonComponent.removeElement();
   }
 }
