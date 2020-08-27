@@ -7,6 +7,7 @@ import TaskList from "./view/task-list.js";
 import CardEdit from "./view/edit-card.js";
 import CardCreate from "./view/create-card.js";
 import LoadButton from "./view/load-button.js";
+import NoTasks from "./view/no-tasks";
 import {generateTask} from "./view/task.js";
 import {generateFilter} from "./view/filters.js";
 
@@ -25,7 +26,12 @@ render(mainElement, new SiteFilters(filters).getElement(), renderPosition.BEFORE
 const boardElement = new Board();
 
 render(mainElement, boardElement.getElement(), renderPosition.BEFOREEND);
-render(boardElement.getElement(), new BoardFilters().getElement(), renderPosition.AFTERBEGIN);
+
+if (tasks.every((task) => task.isArchive)) {
+  render(boardElement.getElement(), new NoTasks().getElement(), renderPosition.BEFOREEND);
+} else {
+  render(boardElement.getElement(), new BoardFilters().getElement(), renderPosition.AFTERBEGIN);
+}
 
 const cardsContainer = new TaskList();
 
@@ -43,13 +49,24 @@ const renderCard = (taskListElement, task) => {
     taskListElement.replaceChild(cardComponent.getElement(), cardEditComponent.getElement());
   };
 
+  const escKeydownHandler = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      evt.preventDefault();
+      replaceFormToCard();
+
+      document.removeEventListener(`keydown`, escKeydownHandler);
+    }
+  };
+
   cardComponent.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
     replaceCardToForm();
+    document.addEventListener(`keydown`, escKeydownHandler);
   });
 
   cardEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceFormToCard();
+    document.addEventListener(`keydown`, escKeydownHandler);
   });
 
   render(taskListElement, cardComponent.getElement(), renderPosition.BEFOREEND);
