@@ -1,4 +1,5 @@
-import {isExpired, isRepeating, humanizeTaskDueDate, createElement} from "../util.js";
+import {isExpired, isRepeating, humanizeTaskDueDate} from "../utils/task.js";
+import AbstractClass from "./abstract.js";
 
 const getCardTemplate = (tasks) => {
   const {color, description, dueDate, repeating, isArchive, isFavorite} = tasks;
@@ -69,21 +70,24 @@ const getCardTemplate = (tasks) => {
   );
 };
 
-export default class CardCreate {
+export default class CardCreate extends AbstractClass {
   constructor(task) {
+    super();
     this._task = task;
-    this._element = null;
+    this._editButtonClickHandler = this._editButtonClickHandler.bind(this);
+  }
+
+  _editButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
+  }
+
+  setEditButtonClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, this._editButtonClickHandler);
   }
 
   getTemplate() {
     return getCardTemplate(this._task);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
   }
 }

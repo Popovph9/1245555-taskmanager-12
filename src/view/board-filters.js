@@ -1,4 +1,4 @@
-import {createElement} from "../util.js";
+import AbstractClass from "./abstract.js";
 
 const getBordFiltersTemplate = () => {
   return (
@@ -12,24 +12,8 @@ const getBordFiltersTemplate = () => {
   );
 };
 
-export default class BoardFilters {
-  constructor() {
-    this._element = null;
-  }
-
+export default class BoardFilters extends AbstractClass {
   getTemplate() {
     return getBordFiltersTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
