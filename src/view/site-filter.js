@@ -1,4 +1,4 @@
-import {createElement} from "../util.js";
+import AbstractClass from "./abstract.js";
 
 
 const createFilterItemTemplate = (filter, isChecked) => {
@@ -31,25 +31,13 @@ const createFilterTemplate = (filterItems) => {
   );
 };
 
-export default class SiteFilters {
+export default class SiteFilters extends AbstractClass {
   constructor(filters) {
+    super();
     this._filters = filters;
-    this._element = null;
   }
 
   getTemplate() {
     return createFilterTemplate(this._filters);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

@@ -1,5 +1,6 @@
 import {COLORS} from "../const.js";
-import {isExpired, humanizeTaskDueDate, createElement} from "../util.js";
+import {isExpired, humanizeTaskDueDate} from "../utils/task.js";
+import AbstractClass from "./abstract.js";
 
 const BLANK_TASK = {
   color: COLORS[0],
@@ -140,25 +141,24 @@ const getEditCardTemplate = (tasks) => {
   );
 };
 
-export default class CardEdit {
+export default class CardEdit extends AbstractClass {
   constructor(task) {
+    super();
     this._task = task || BLANK_TASK;
-    this._element = null;
+    this._cardEditKeyDownHandler = this._cardEditKeyDownHandler.bind(this);
+  }
+
+  _cardEditKeyDownHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  }
+
+  setCardEditKeyDownHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
   }
 
   getTemplate() {
     return getEditCardTemplate(this._task);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

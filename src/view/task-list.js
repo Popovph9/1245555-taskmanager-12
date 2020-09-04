@@ -1,4 +1,4 @@
-import {createElement} from "../util.js";
+import AbstractClass from "./abstract.js";
 
 
 const createTaskListTemplate = () => {
@@ -9,24 +9,8 @@ const createTaskListTemplate = () => {
   );
 };
 
-export default class TaskList {
-  constructor() {
-    this._element = null;
-  }
-
+export default class TaskList extends AbstractClass {
   getTemplate() {
     return createTaskListTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
