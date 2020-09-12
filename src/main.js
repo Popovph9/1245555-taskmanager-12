@@ -4,7 +4,7 @@ import SiteFilters from "./view/site-filter.js";
 
 import {generateTask} from "./view/task.js";
 import {generateFilter} from "./view/filters.js";
-import Presenter from "./presenter.js";
+import BoardPresenter from "./boardPresenter.js";
 
 const CARDS_COUNT = 22;
 
@@ -17,6 +17,5 @@ const siteHeader = mainElement.querySelector(`.main__control`);
 render(siteHeader, new SiteMenu(), renderPosition.BEFOREEND);
 render(mainElement, new SiteFilters(filters), renderPosition.BEFOREEND);
 
-const boardPresenter = new Presenter(mainElement);
-
+const boardPresenter = new BoardPresenter(mainElement);
 boardPresenter.init(tasks);

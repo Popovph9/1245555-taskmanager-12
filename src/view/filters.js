@@ -1,4 +1,4 @@
-import {isExpired, isRepeating, isTaskExpireToday} from "../utils/task.js";
+import {isExpired, isTaskRepeating, isTaskExpireToday} from "../utils/task.js";
 
 const tasksToFilterMap = {
   all: (tasks) => tasks.filter((task) => !task.isArchive).length,
@@ -13,7 +13,7 @@ const tasksToFilterMap = {
     .filter((task) => task.isFavorite).length,
   repeating: (tasks) => tasks
     .filter((task) => !task.isArchive)
-    .filter((task) => isRepeating(task.repeating)).length,
+    .filter((task) => isTaskRepeating(task.repeating)).length,
   archive: (tasks) => tasks.filter((task) => task.isArchive).length,
 };
 
