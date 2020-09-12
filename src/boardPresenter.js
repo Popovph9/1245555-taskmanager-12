@@ -1,9 +1,9 @@
-import {render, renderPosition, remove, replace} from "./utils/render.js";
+import {render, renderPosition, remove} from "./utils/render.js";
+import {updateItem} from "./utils/common.js";
 import Board from "./view/board-element.js";
 import BoardFilters from "./view/board-filters.js";
 import TaskList from "./view/task-list.js";
-import CardEdit from "./view/edit-card.js";
-import CardCreate from "./view/create-card.js";
+import TaskPresenter from "./presenter/taskPresenter.js";
 import LoadButton from "./view/load-button.js";
 import NoTasks from "./view/no-tasks";
 import {sortTaskDown, sortTaskUp} from "./utils/task.js";
@@ -11,7 +11,7 @@ import {SortType} from "./const.js";
 
 const CARDS_COUNT_PER_STEP = 8;
 
-export default class Presenter {
+export default class BoardPresenter {
   constructor(boardContainer) {
     this._boardContainer = boardContainer;
 
@@ -23,20 +23,34 @@ export default class Presenter {
     this._taskListComponent = new TaskList();
     this._noTaskComponent = new NoTasks();
     this._loadButtonComponent = new LoadButton();
+    this._taskPresenter = {};
 
-    this._handleLoadMoreButtonClick = this.__handleLoadMoreButtonClick.bind(this);
+    this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._handleTaskChange = this._handleTaskChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(boardTasks) {
     this._boardTasks = boardTasks.slice();
-
     this._sourcedBoardTasks = boardTasks.slice();
 
     render(this._boardContainer, this._boardComponent, renderPosition.BEFOREEND);
     render(this._boardComponent, this._taskListComponent, renderPosition.BEFOREEND);
 
     this._renderBoard();
+  }
+
+  _handleModeChange() {
+    Object
+      .values(this._taskPresenter)
+      .forEach((presenter) => presenter.resetView());
+  }
+
+  _handleTaskChange(updatedTask) {
+    this._boardTasks = updateItem(this._boardTasks, updatedTask);
+    this._sourcedBoardTasks = updateItem(this._boardTasks, updatedTask);
+    this._taskPresenter[updatedTask.id].init(updatedTask);
   }
 
   _sortTasks(sortType) {
@@ -69,50 +83,22 @@ export default class Presenter {
   }
 
   _renderTask(task) {
-    const cardComponent = new CardCreate(task);
-    const cardEditComponent = new CardEdit(task);
-
-    const replaceCardToForm = () => {
-      replace(cardEditComponent, cardComponent);
-    };
-
-    const replaceFormToCard = () => {
-      replace(cardComponent, cardEditComponent);
-    };
-
-    const escKeydownHandler = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        evt.preventDefault();
-        replaceFormToCard();
-
-        document.removeEventListener(`keydown`, escKeydownHandler);
-      }
-    };
-
-    cardComponent.setEditButtonClickHandler(() => {
-      replaceCardToForm();
-      document.addEventListener(`keydown`, escKeydownHandler);
-    });
-
-    cardEditComponent.setCardEditKeyDownHandler(() => {
-      replaceFormToCard();
-      document.removeEventListener(`keydown`, escKeydownHandler);
-    });
-
-    render(this._taskListComponent, cardComponent, renderPosition.BEFOREEND);
+    const taskPresenter = new TaskPresenter(this._taskListComponent, this._handleTaskChange, this._handleModeChange);
+    taskPresenter.init(task);
+    this._taskPresenter[task.id] = taskPresenter;
   }
 
   _renderTasks(from, to) {
-    this._boardTasks.slice(from, to).forEach((boardTask) => {
-      this._renderTask(boardTask);
-    });
+    this._boardTasks
+      .slice(from, to)
+      .forEach((boardTask) => this._renderTask(boardTask));
   }
 
   _renderNoTasks() {
     render(this._boardComponent, this._noTaskComponent, renderPosition.AFTERBEGIN);
   }
 
-  __handleLoadMoreButtonClick() {
+  _handleLoadMoreButtonClick() {
     this._renderTasks(this._renderedCardsCount, this._renderedCardsCount + CARDS_COUNT_PER_STEP);
     this._renderedCardsCount += CARDS_COUNT_PER_STEP;
 
@@ -124,7 +110,7 @@ export default class Presenter {
   _renderloadMoreButtton() {
     render(this._boardComponent, this._loadButtonComponent, renderPosition.BEFOREEND);
 
-    this._loadButtonComponent.setClickHandler(this.__handleLoadMoreButtonClick);
+    this._loadButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
   }
 
   _renderTaskList() {
@@ -136,7 +122,8 @@ export default class Presenter {
   }
 
   _clearTaskList() {
-    this._taskListComponent.getElement().innerHTML = ``;
+    Object.values(this._taskPresenter).forEach((presenter) => presenter.destroy());
+    this._taskPresenter = {};
     this._renderedCardsCount = CARDS_COUNT_PER_STEP;
   }
 
