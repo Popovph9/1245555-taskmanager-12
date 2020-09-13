@@ -1,6 +1,9 @@
 import {COLORS} from "../const.js";
-import {isExpired, humanizeTaskDueDate, isTaskRepeating} from "../utils/task.js";
+import {humanizeTaskDueDate, isTaskRepeating} from "../utils/task.js";
 import Smart from "./smart.js";
+
+import flatpickr from "flatpickr";
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const BLANK_TASK = {
   color: COLORS[0],
@@ -21,20 +24,20 @@ const BLANK_TASK = {
 
 const createTaskEditDateTemplate = (dueDate, isDueDate) => {
   return `<button class="card__date-deadline-toggle" type="button">
-  date: <span class="card__date-status">${isDueDate ? `yes` : `no`}</span>
-  </button>
-  ${isDueDate ? `<fieldset class="card__date-deadline">
-  <label class="card__input-deadline-wrap">
-    <input
-      class="card__date"
-      type="text"
-      placeholder=""
-      name="date"
-      value="${dueDate.toLocaleString(`en-US`, {day: `numeric`, month: `long`})}"
-      value="${humanizeTaskDueDate(dueDate)}"
-    />
-  </label>
-  </fieldset>` : ``}`;
+      date: <span class="card__date-status">${isDueDate ? `yes` : `no`}</span>
+    </button>
+    ${isDueDate ? `<fieldset class="card__date-deadline">
+      <label class="card__input-deadline-wrap">
+        <input
+          class="card__date"
+          type="text"
+          placeholder=""
+          name="date"
+          value="${dueDate !== null ? humanizeTaskDueDate(dueDate) : ``}"
+        />
+      </label>
+    </fieldset>` : ``}
+  `;
 };
 
 const createTaskEditRepeatingTemplate = (repeating, isRepeating) => {
@@ -58,9 +61,8 @@ const createTaskEditRepeatingTemplate = (repeating, isRepeating) => {
   </fieldset>` : `` }`;
 };
 
-const createCardEditColorTeamplate = (currentColor) => {
-  return COLORS.map((color) =>
-    `<input
+const createTaskEditColorsTemplate = (currentColor) => {
+  return COLORS.map((color) => `<input
     type="radio"
     id="color-${color}"
     class="card__color-input card__color-input--${color} visually-hidden"
@@ -79,20 +81,19 @@ const getEditCardTemplate = (data) => {
 
   const {color, description, dueDate, repeating, isDueDate, isRepeating} = data;
 
-  const isExpiredClassName = isExpired(dueDate) ? `card--deadline` : ``;
 
   const dateTemplate = createTaskEditDateTemplate(dueDate, isDueDate);
 
   const repeatingTemplate = createTaskEditRepeatingTemplate(repeating, isRepeating);
 
-  const CardEditColorTeamplate = createCardEditColorTeamplate(color);
+  const CardEditColorTeamplate = createTaskEditColorsTemplate(color);
 
   const isSubmitDisabled = isRepeating && !isTaskRepeating(repeating);
 
   const repeatingClassName = isRepeating ? `card--repeat` : ``;
 
   return (
-    `<article class="card card--edit ${color} ${isExpiredClassName} ${repeatingClassName}">
+    `<article class="card card--edit card--${color} ${repeatingClassName}">
 
       <form class="card__form" method="get">
         <div class="card__inner">
@@ -144,14 +145,18 @@ export default class CardEdit extends Smart {
     super();
     this._task = task;
     this._data = CardEdit.parseTaskToData(task);
+    this._datepicker = null;
+
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._dueDateToggleHandler = this._dueDateToggleHandler.bind(this);
     this._repeatingToggleHandler = this._repeatingToggleHandler.bind(this);
+    this._dueDateChangeHandler = this._dueDateChangeHandler.bind(this);
     this._descriptionInputHandler = this._descriptionInputHandler.bind(this);
     this._repeatingChangeHandler = this._repeatingChangeHandler.bind(this);
     this._colorChangeHandler = this._colorChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   reset(task) {
@@ -186,6 +191,7 @@ export default class CardEdit extends Smart {
   restoreHandlers() {
     this._setInnerHandlers();
     this.setCardEditFormSubmitHandler(this._callback.formSubmit);
+    this._setDatepicker();
   }
 
   _setInnerHandlers() {
@@ -238,6 +244,32 @@ export default class CardEdit extends Smart {
   setCardEditFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  _setDatepicker() {
+    if (this._datepicker) {
+      this._datepicker.destroy();
+      this._datepicker = null;
+    }
+
+    if (this._data.isDueDate) {
+      this._datepicker = flatpickr(
+          this.getElement().querySelector(`.card__date`),
+          {
+            dateFormat: `j F`,
+            defaultDate: this._data.dueDate,
+            onChange: this._dueDateChangeHandler
+          }
+      );
+    }
+  }
+
+  _dueDateChangeHandler([userDate]) {
+    userDate.setHours(23, 59, 59, 999);
+
+    this.updateData({
+      dueDate: userDate
+    });
   }
 
   getTemplate() {
