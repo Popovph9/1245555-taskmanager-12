@@ -5,6 +5,8 @@ import Smart from "./smart.js";
 import flatpickr from "flatpickr";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
+import he from "he";
+
 const BLANK_TASK = {
   color: COLORS[0],
   description: ``,
@@ -109,7 +111,7 @@ const getEditCardTemplate = (data) => {
                 class="card__text"
                 placeholder="Start typing your text here..."
                 name="text"
-              >${description}</textarea>
+              >${he.encode(description)}</textarea>
             </label>
           </div>
 
@@ -148,6 +150,7 @@ export default class CardEdit extends Smart {
     this._datepicker = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._deleteButtonClickHandler = this._deleteButtonClickHandler.bind(this);
     this._dueDateToggleHandler = this._dueDateToggleHandler.bind(this);
     this._repeatingToggleHandler = this._repeatingToggleHandler.bind(this);
     this._dueDateChangeHandler = this._dueDateChangeHandler.bind(this);
@@ -188,34 +191,9 @@ export default class CardEdit extends Smart {
     this._callback.formSubmit(CardEdit.parseDataToTask(this._data));
   }
 
-  restoreHandlers() {
-    this._setInnerHandlers();
-    this.setCardEditFormSubmitHandler(this._callback.formSubmit);
-    this._setDatepicker();
-  }
-
-  _setInnerHandlers() {
-    this.getElement()
-      .querySelector(`.card__date-deadline-toggle`)
-      .addEventListener(`click`, this._dueDateToggleHandler);
-
-    this.getElement()
-      .querySelector(`.card__repeat-toggle`)
-      .addEventListener(`click`, this._repeatingToggleHandler);
-
-    this.getElement()
-      .querySelector(`.card__text`)
-      .addEventListener(`input`, this._descriptionInputHandler);
-
-    if (this._data.isRepeating) {
-      this.getElement()
-          .querySelector(`.card__repeat-days-inner`)
-          .addEventListener(`change`, this._repeatingChangeHandler);
-    }
-
-    this.getElement()
-        .querySelector(`.card__colors-wrap`)
-        .addEventListener(`change`, this._colorChangeHandler);
+  _deleteButtonClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(CardEdit.parseDataToTask(this._data));
   }
 
   _dueDateToggleHandler(evt) {
@@ -244,6 +222,11 @@ export default class CardEdit extends Smart {
   setCardEditFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
     this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setDeleteButtonClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.card__delete`).addEventListener(`click`, this._deleteButtonClickHandler);
   }
 
   _setDatepicker() {
@@ -285,6 +268,46 @@ export default class CardEdit extends Smart {
           isRepeating: isTaskRepeating(task.repeating)
         }
     );
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this._setDatepicker();
+    this.setCardEditFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteButtonClickHandler(this._callback.deleteClick);
+  }
+
+  _setInnerHandlers() {
+    this.getElement()
+      .querySelector(`.card__date-deadline-toggle`)
+      .addEventListener(`click`, this._dueDateToggleHandler);
+
+    this.getElement()
+      .querySelector(`.card__repeat-toggle`)
+      .addEventListener(`click`, this._repeatingToggleHandler);
+
+    this.getElement()
+      .querySelector(`.card__text`)
+      .addEventListener(`input`, this._descriptionInputHandler);
+
+    if (this._data.isRepeating) {
+      this.getElement()
+          .querySelector(`.card__repeat-days-inner`)
+          .addEventListener(`change`, this._repeatingChangeHandler);
+    }
+
+    this.getElement()
+        .querySelector(`.card__colors-wrap`)
+        .addEventListener(`change`, this._colorChangeHandler);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._datepicker) {
+      this._datepicker.destroy();
+      this._datepicker = null;
+    }
   }
 
   static parseDataToTask(data) {
