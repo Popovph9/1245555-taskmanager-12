@@ -1,6 +1,8 @@
 import {isExpired, isTaskRepeating, humanizeTaskDueDate} from "../utils/task.js";
 import AbstractClass from "./abstract.js";
 
+import he from "he";
+
 const getCardTemplate = (tasks) => {
   const {color, description, dueDate, repeating, isArchive, isFavorite} = tasks;
 
@@ -46,7 +48,7 @@ const getCardTemplate = (tasks) => {
           </div>
 
           <div class="card__textarea-wrap">
-            <p class="card__text">${description}</p>
+            <p class="card__text">${he.encode(description)}</p>
           </div>
 
           <div class="card__settings">
