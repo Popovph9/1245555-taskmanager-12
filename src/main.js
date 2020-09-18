@@ -39,7 +39,10 @@ const handleSiteMenuClick = (menuItem) => {
       filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
       boardPresenter.init();
       boardPresenter.createCard(handleTaskNewFormClose);
-      siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = true;
+      const tasksItem = siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`);
+      if (tasksItem) {
+        tasksItem.disabled = true;
+      }
       break;
     case MenuItem.TASKS:
       boardPresenter.init();
