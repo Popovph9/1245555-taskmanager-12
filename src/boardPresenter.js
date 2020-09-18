@@ -35,9 +35,6 @@ export default class BoardPresenter {
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
 
-    this._tasksModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
-
     this._newCardPresenter = new NewTaskPresenter(this._taskListComponent, this._handleViewAction);
   }
 
@@ -45,13 +42,26 @@ export default class BoardPresenter {
     render(this._boardContainer, this._boardComponent, renderPosition.BEFOREEND);
     render(this._boardComponent, this._taskListComponent, renderPosition.BEFOREEND);
 
+    this._tasksModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
     this._renderBoard();
   }
 
-  createCard() {
+  destroy() {
+    this._clearBoard({resetRenderedTaskCount: true, resetSortType: true});
+
+    remove(this._taskListComponent);
+    remove(this._boardComponent);
+
+    this._tasksModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
+  createCard(callback) {
     this._currentSortType = SortType.DEFAULT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
-    this._newCardPresenter.init();
+    this._newCardPresenter.init(callback);
   }
 
   _getTasks() {
