@@ -1,6 +1,6 @@
 import moment from "moment";
 
-const getCurrentDay = () => {
+export const getCurrentDay = () => {
   const currentDate = new Date();
 
   currentDate.setHours(23, 59, 59, 999);

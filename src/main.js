@@ -1,10 +1,12 @@
-import {render, renderPosition} from "./utils/render.js";
+import {render, renderPosition, remove} from "./utils/render.js";
 import SiteMenu from "./view/site-menu.js";
 import TaskModel from "./model/taskModel.js";
 import FilterModel from "./model/filterModel.js";
 import {generateTask} from "./view/task.js";
 import FiltersPresenter from "./presenter/filterPresenter.js";
 import BoardPresenter from "./boardPresenter.js";
+import {MenuItem, FilterType, UpdateType} from "./const.js";
+import Statistics from "./view/statistics.js";
 
 const CARDS_COUNT = 22;
 
@@ -20,12 +22,44 @@ const siteHeader = mainElement.querySelector(`.main__control`);
 
 const boardPresenter = new BoardPresenter(mainElement, taskModel, filterModel);
 const filterPresenter = new FiltersPresenter(mainElement, filterModel, taskModel);
+const siteMenuComponent = new SiteMenu();
 
-render(siteHeader, new SiteMenu(), renderPosition.BEFOREEND);
+const handleTaskNewFormClose = () => {
+  siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`).disabled = false;
+  siteMenuComponent.setMenuItem(MenuItem.TASKS);
+};
+
+let statisticsComponent = null;
+
+const handleSiteMenuClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.ADD_NEW_TASK:
+      remove(statisticsComponent);
+      boardPresenter.destroy();
+      filterModel.setFilter(UpdateType.MAJOR, FilterType.ALL);
+      boardPresenter.init();
+      boardPresenter.createCard(handleTaskNewFormClose);
+      const tasksItem = siteMenuComponent.getElement().querySelector(`[value=${MenuItem.TASKS}]`);
+      if (tasksItem) {
+        tasksItem.disabled = true;
+      }
+      break;
+    case MenuItem.TASKS:
+      boardPresenter.init();
+      remove(statisticsComponent);
+      break;
+    case MenuItem.STATISTICS:
+      boardPresenter.destroy();
+      statisticsComponent = new Statistics(taskModel.getTasks());
+      render(mainElement, statisticsComponent, renderPosition.BEFOREEND);
+      break;
+  }
+};
+
+siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
+
+render(siteHeader, siteMenuComponent, renderPosition.BEFOREEND);
 filterPresenter.init();
 boardPresenter.init();
 
-document.querySelector(`#control__new-task`).addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  boardPresenter.createCard();
-});
+
