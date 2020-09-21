@@ -1,4 +1,4 @@
-import {generateId} from "../view/task.js";
+import {generateId} from "../utils/task.js";
 import CardEdit from "../view/edit-card.js";
 import {render, renderPosition, remove} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";

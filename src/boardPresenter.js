@@ -1,4 +1,7 @@
 import {render, renderPosition, remove} from "./utils/render.js";
+import {filter} from "./utils/filter.js";
+import {sortTaskDown, sortTaskUp} from "./utils/task.js";
+import {SortType, UpdateType, UserAction, FilterType} from "./const.js";
 import Board from "./view/board-element.js";
 import BoardFilters from "./view/board-filters.js";
 import TaskList from "./view/task-list.js";
@@ -6,27 +9,29 @@ import TaskPresenter from "./presenter/taskPresenter.js";
 import NewTaskPresenter from "./presenter/newTaskPresenter.js";
 import LoadButton from "./view/load-button.js";
 import NoTasks from "./view/no-tasks";
-import {filter} from "./utils/filter.js";
-import {sortTaskDown, sortTaskUp} from "./utils/task.js";
-import {SortType, UpdateType, UserAction, FilterType} from "./const.js";
+import Loading from "./view/loading.js";
+
 
 const CARDS_COUNT_PER_STEP = 8;
 
 export default class BoardPresenter {
-  constructor(boardContainer, tasksModel, filterModel) {
+  constructor(boardContainer, tasksModel, filterModel, api) {
     this._boardContainer = boardContainer;
     this._filterModel = filterModel;
     this._tasksModel = tasksModel;
+    this._api = api;
 
     this._sortComponent = null;
     this._loadButtonComponent = null;
 
     this._renderedCardsCount = CARDS_COUNT_PER_STEP;
     this._currentSortType = SortType.DEFAULT;
+    this._isLoading = true;
 
     this._boardComponent = new Board();
     this._taskListComponent = new TaskList();
     this._noTaskComponent = new NoTasks();
+    this._loadingComponent = new Loading();
     this._taskPresenter = {};
 
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
@@ -90,7 +95,9 @@ export default class BoardPresenter {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.UPDATE_TASK:
-        this._tasksModel.updateTask(updateType, update);
+        this._api.updateTask(update).then((response) => {
+          this._tasksModel.updateTask(updateType, response);
+        });
         break;
       case UserAction.ADD_TASK:
         this._tasksModel.addTask(updateType, update);
@@ -112,6 +119,11 @@ export default class BoardPresenter {
         break;
       case UpdateType.MAJOR:
         this._clearBoard({resetRenderedTaskCount: true, resetSortType: true});
+        this._renderBoard();
+        break;
+      case UpdateType.INIT:
+        this._isLoading = false;
+        remove(this._loadingComponent);
         this._renderBoard();
         break;
     }
@@ -212,6 +224,11 @@ export default class BoardPresenter {
   }
 
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     const tasks = this._getTasks();
     const taskCount = tasks.length;
 
@@ -227,5 +244,9 @@ export default class BoardPresenter {
     if (taskCount > this._renderedCardsCount) {
       this._renderLoadMoreButton();
     }
+  }
+
+  _renderLoading() {
+    render(this._boardComponent, this._loadingComponent, renderPosition.AFTERBEGIN);
   }
 }

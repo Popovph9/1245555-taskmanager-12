@@ -83,3 +83,5 @@ export const sortTaskDown = (taskA, taskB) => {
 
   return taskB.dueDate.getTime() - taskA.dueDate.getTime();
 };
+
+export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
