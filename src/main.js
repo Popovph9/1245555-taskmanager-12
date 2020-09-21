@@ -2,25 +2,21 @@ import {render, renderPosition, remove} from "./utils/render.js";
 import SiteMenu from "./view/site-menu.js";
 import TaskModel from "./model/taskModel.js";
 import FilterModel from "./model/filterModel.js";
-//import {generateTask} from "./view/task.js";
 import FiltersPresenter from "./presenter/filterPresenter.js";
 import BoardPresenter from "./boardPresenter.js";
 import {MenuItem, FilterType, UpdateType} from "./const.js";
 import Statistics from "./view/statistics.js";
 import Api from "./api.js";
 
-//const CARDS_COUNT = 22;
 const AUTHORIZATION = `Basic hS2sd3dfSwcl1sa2j`;
 const END_POINT = `https://12.ecmascript.pages.academy/task-manager`;
 
 const mainElement = document.querySelector(`.main`);
 const siteHeader = mainElement.querySelector(`.main__control`);
 
-//const tasks = new Array(CARDS_COUNT).fill().map(generateTask);
 const api = new Api(END_POINT, AUTHORIZATION);
 
 const taskModel = new TaskModel();
-//taskModel.setTasks(tasks);
 
 const filterModel = new FilterModel();
 
@@ -60,14 +56,10 @@ const handleSiteMenuClick = (menuItem) => {
   }
 };
 
-//siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
-
-//render(siteHeader, siteMenuComponent, renderPosition.BEFOREEND);
 filterPresenter.init();
 boardPresenter.init();
 
 api.getTasks().then((tasks) => {
-  console.log(tasks);
   taskModel.setTasks(UpdateType.INIT, tasks);
   render(siteHeader, siteMenuComponent, renderPosition.BEFOREEND);
   siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
@@ -77,4 +69,3 @@ api.getTasks().then((tasks) => {
     render(siteHeader, siteMenuComponent, renderPosition.BEFOREEND);
     siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
   });
-
