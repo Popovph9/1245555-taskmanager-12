@@ -79,7 +79,7 @@ export default class TaskPresenter {
 
   setViewState(state) {
     const resetFormState = () => {
-      this._taskEditComponent.updateData({
+      this._cardEditComponent.updateData({
         isDisabled: false,
         isSaving: false,
         isDeleting: false

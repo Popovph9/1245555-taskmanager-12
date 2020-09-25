@@ -96,31 +96,34 @@ export default class BoardPresenter {
     switch (actionType) {
       case UserAction.UPDATE_TASK:
         this._taskPresenter[update.id].setViewState(TaskPresenterViewState.SAVING);
-        this._api.updateTask(update).then((response) => {
-          this._tasksModel.updateTask(updateType, response)
+        this._api.updateTask(update)
+          .then((response) => {
+            this._tasksModel.updateTask(updateType, response);
+          })
           .catch(() => {
             this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
           });
-        });
         break;
       case UserAction.ADD_TASK:
         this._newCardPresenter.setSaving();
-        this._api.addTask(update).then((response) => {
-          this._tasksModel.addTask(updateType, response)
+        this._api.addTask(update)
+          .then((response) => {
+            this._tasksModel.addTask(updateType, response);
+          })
           .catch(() => {
             this._newCardPresenter.setAborting();
           });
-        });
         break;
       case UserAction.DELETE_TASK:
         this._taskPresenter[update.id].setViewState(TaskPresenterViewState.DELETING);
-        this._tasksModel.deleteTask(updateType, update);
-        this._api.deleteTask(update).then(() => {
-          this._tasksModel.deleteTask(updateType, update)
+
+        this._api.deleteTask(update)
+          .then(() => {
+            this._tasksModel.deleteTask(updateType, update);
+          })
           .catch(() => {
             this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
           });
-        });
         break;
     }
   }
