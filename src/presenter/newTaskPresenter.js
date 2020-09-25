@@ -1,4 +1,3 @@
-import {generateId} from "../utils/task.js";
 import CardEdit from "../view/edit-card.js";
 import {render, renderPosition, remove} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
@@ -33,6 +32,26 @@ export default class NewTaskPresenter {
     document.addEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._cardEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._cardEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this._cardEditComponent.shake(resetFormState);
+  }
+
+
   destroy() {
     if (this._cardEditComponent === null) {
       return;
@@ -51,10 +70,8 @@ export default class NewTaskPresenter {
     this._changeData(
         UserAction.ADD_TASK,
         UpdateType.MINOR,
-        Object.assign({id: generateId()}, task)
+        task
     );
-
-    this.destroy();
   }
 
   _handleDeleteClick() {

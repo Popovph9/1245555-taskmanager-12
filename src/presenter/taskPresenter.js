@@ -4,9 +4,15 @@ import {isDatesEqual, isTaskRepeating} from "../utils/task.js";
 import CardEdit from "../view/edit-card.js";
 import CardCreate from "../view/create-card.js";
 
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`,
+  ABORTING: `ABORTING`
+};
+
 const Mode = {
   DEFAULT: `DEFAULT`,
-  EDITING: `EDITING`
+  DELETING: `DELETING`,
 };
 
 export default class TaskPresenter {
@@ -52,7 +58,8 @@ export default class TaskPresenter {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._cardEditComponent, prevCardEditComponent);
+      replace(this._cardComponent, prevCardComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevCardComponent);
@@ -67,6 +74,35 @@ export default class TaskPresenter {
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceFormToCard();
+    }
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._taskEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._cardEditComponent.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._cardEditComponent.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._cardComponent.shake(resetFormState);
+        this._cardEditComponent.shake(resetFormState);
+        break;
     }
   }
 
@@ -133,8 +169,6 @@ export default class TaskPresenter {
         isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
         update
     );
-
-    this._replaceFormToCard();
   }
 
   _handleDeleteClick(task) {

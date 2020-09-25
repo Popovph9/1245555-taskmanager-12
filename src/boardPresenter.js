@@ -5,7 +5,7 @@ import {SortType, UpdateType, UserAction, FilterType} from "./const.js";
 import Board from "./view/board-element.js";
 import BoardFilters from "./view/board-filters.js";
 import TaskList from "./view/task-list.js";
-import TaskPresenter from "./presenter/taskPresenter.js";
+import TaskPresenter, {State as TaskPresenterViewState} from "./presenter/taskPresenter.js";
 import NewTaskPresenter from "./presenter/newTaskPresenter.js";
 import LoadButton from "./view/load-button.js";
 import NoTasks from "./view/no-tasks";
@@ -95,15 +95,32 @@ export default class BoardPresenter {
   _handleViewAction(actionType, updateType, update) {
     switch (actionType) {
       case UserAction.UPDATE_TASK:
+        this._taskPresenter[update.id].setViewState(TaskPresenterViewState.SAVING);
         this._api.updateTask(update).then((response) => {
-          this._tasksModel.updateTask(updateType, response);
+          this._tasksModel.updateTask(updateType, response)
+          .catch(() => {
+            this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
+          });
         });
         break;
       case UserAction.ADD_TASK:
-        this._tasksModel.addTask(updateType, update);
+        this._newCardPresenter.setSaving();
+        this._api.addTask(update).then((response) => {
+          this._tasksModel.addTask(updateType, response)
+          .catch(() => {
+            this._newCardPresenter.setAborting();
+          });
+        });
         break;
       case UserAction.DELETE_TASK:
+        this._taskPresenter[update.id].setViewState(TaskPresenterViewState.DELETING);
         this._tasksModel.deleteTask(updateType, update);
+        this._api.deleteTask(update).then(() => {
+          this._tasksModel.deleteTask(updateType, update)
+          .catch(() => {
+            this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
+          });
+        });
         break;
     }
   }
