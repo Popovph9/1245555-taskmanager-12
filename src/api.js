@@ -64,7 +64,9 @@ export default class Api {
       method: Method.PUT,
       body: JSON.stringify(TaskModel.adaptToServer(task)),
       headers: new Headers({"Content-Type": `application/json`})
-    }).then(Api.toJSON).then(TaskModel.adaptToClient);
+    })
+      .then(Api.toJSON)
+      .then(TaskModel.adaptToClient);
   }
 
   addTask(task) {

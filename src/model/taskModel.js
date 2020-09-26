@@ -16,18 +16,15 @@ export default class TaskModel extends Observer {
   }
 
   updateTask(updateType, update) {
-    const index = this._tasks.findIndex((item) => item.id === update.id);
-
+    const index = this._tasks.findIndex((task) => task.id === update.id);
     if (index === -1) {
       throw new Error(`Can't update unexisting task`);
     }
-
     this._tasks = [
       ...this._tasks.slice(0, index),
       update,
       ...this._tasks.slice(index + 1)
     ];
-
     this._notify(updateType, update);
   }
 
