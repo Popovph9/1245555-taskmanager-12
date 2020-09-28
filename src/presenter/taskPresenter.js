@@ -58,7 +58,7 @@ export default class TaskPresenter {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._cardComponent, prevCardComponent);
+      replace(this._cardComponent, prevCardEditComponent);
       this._mode = Mode.DEFAULT;
     }
 

@@ -55,8 +55,7 @@ const createTaskEditRepeatingTemplate = (repeating, isRepeating, isDisabled) => 
       id="repeat-${day}-1"
       name="repeat"
       value="${day}"
-      ${repeat ? `checked` : ``}
-      ${isDisabled ? `checked` : ``}
+      ${repeat || isDisabled ? `checked` : ``}
       />
       <label class="card__repeat-day" for="repeat-${day}-1"
           >${day}</label

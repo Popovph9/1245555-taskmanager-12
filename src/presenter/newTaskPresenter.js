@@ -51,7 +51,6 @@ export default class NewTaskPresenter {
     this._cardEditComponent.shake(resetFormState);
   }
 
-
   destroy() {
     if (this._cardEditComponent === null) {
       return;

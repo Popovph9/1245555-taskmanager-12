@@ -97,12 +97,12 @@ export default class BoardPresenter {
       case UserAction.UPDATE_TASK:
         this._taskPresenter[update.id].setViewState(TaskPresenterViewState.SAVING);
         this._api.updateTask(update)
-        .then((response) => {
-          this._tasksModel.updateTask(updateType, response);
-        })
-        .catch(() => {
-          this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
-        });
+          .then((response) => {
+            this._tasksModel.updateTask(updateType, response);
+          })
+          .catch(() => {
+            this._taskPresenter[update.id].setViewState(TaskPresenterViewState.ABORTING);
+          });
         break;
       case UserAction.ADD_TASK:
         this._newCardPresenter.setSaving();
